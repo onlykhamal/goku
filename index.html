@@ -1,347 +1,666 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>,<link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#28a745" />
-<link rel="icon" href="icon-192.png" />
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Khamal Puzzle Game - Polished</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Khamal List Maker</title>
-  <style>
-    :root {
-      --bg-light: #f8f9fa;
-      --bg-dark: #121212;
-      --text-light: #333;
-      --text-dark: #eee;
-      --accent: #28a745;
-      --accent-dark: #4caf50;
-    }
+  /* Reset */
+  * {
+    box-sizing: border-box;
+  }
 
-    body {
-      font-family: Arial, sans-serif;
-      background-color: var(--bg-light);
-      color: var(--text-light);
-      max-width: 700px;
-      margin: 30px auto;
-      padding: 20px;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    body.dark {
-      background-color: var(--bg-dark);
-      color: var(--text-dark);
-    }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #ececec;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+  }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
+  h1 {
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 0 0 8px #00eaffaa;
+  }
 
-    #controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 15px;
-    }
-    #itemInput, #dueDate, #category, #searchInput {
-      flex: 1 1 150px;
-      padding: 8px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    body.dark #itemInput,
-    body.dark #dueDate,
-    body.dark #category,
-    body.dark #searchInput {
-      background-color: #333;
-      color: var(--text-dark);
-      border-color: #555;
-    }
+  #startScreen, #gameContainer {
+    width: 420px;
+    max-width: 95vw;
+    background: rgba(30, 30, 30, 0.85);
+    border-radius: 12px;
+    box-shadow: 0 0 16px #00eaff88;
+    padding: 16px 24px 24px;
+  }
 
-    button {
-      padding: 10px 16px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      background-color: var(--accent);
-      color: white;
-      transition: background-color 0.3s;
-    }
-    button:hover {
-      background-color: var(--accent-dark);
-    }
-    #clearBtn {
-      background-color: #dc3545;
-    }
-    #clearBtn:hover {
-      background-color: #b02a37;
-    }
-    #darkModeBtn {
-      background-color: #007bff;
-    }
-    #darkModeBtn:hover {
-      background-color: #0056b3;
-    }
+  #startScreen {
+    margin-bottom: 20px;
+  }
 
-    ul {
-      list-style: none;
-      padding-left: 0;
-      margin-top: 20px;
-    }
+  label {
+    font-size: 1rem;
+    margin-right: 8px;
+    user-select: text;
+  }
 
-    li {
-      background-color: white;
-      margin-bottom: 10px;
-      padding: 12px;
-      border-radius: 8px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-      border: 1px solid #ddd;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    body.dark li {
-      background-color: #222;
-      border-color: #444;
-      color: var(--text-dark);
-    }
+  select, button {
+    font-size: 1rem;
+    border-radius: 6px;
+    border: none;
+    padding: 8px 16px;
+    background: #0f89ffcc;
+    color: #111;
+    font-weight: 600;
+    box-shadow: 0 0 6px #00bfffaa;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  select:focus, button:focus {
+    outline: 2px solid #00eaffcc;
+  }
+  button:hover {
+    background: #00bfff;
+    box-shadow: 0 0 12px #00dfff;
+  }
 
-    li.done label {
-      text-decoration: line-through;
-      color: gray;
-    }
+  #startBtn {
+    margin-left: 12px;
+  }
 
-    .item-text {
-      flex: 1 1 200px;
-      word-break: break-word;
-    }
-    .item-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      font-size: 0.9rem;
-      color: #555;
-    }
-    body.dark .item-meta {
-      color: #bbb;
-    }
+  #board {
+    margin-top: 20px;
+    width: 400px;
+    height: 400px;
+    background: #111a28;
+    border-radius: 12px;
+    box-shadow: inset 0 0 18px #00bfff88;
+    position: relative;
+  }
 
-    .delete-btn {
-      background: none;
-      border: none;
-      color: red;
-      font-size: 20px;
-      cursor: pointer;
-      padding: 4px 8px;
-      align-self: flex-start;
-      transition: color 0.3s;
-    }
-    .delete-btn:hover {
-      color: #b02a37;
-    }
+  .tile {
+    position: absolute;
+    background-image: url('https://i.imgur.com/Y101JgD.jpeg');
+    background-repeat: no-repeat;
+    background-size: 400px 400px;
+    border-radius: 8px;
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 #ffffff33;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    font-weight: 700;
+    font-size: 1.2rem;
+    transition:
+      transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 0.2s ease,
+      filter 0.3s ease;
+    will-change: transform;
+  }
+  .tile:hover, .tile:focus {
+    filter: brightness(1.2);
+    box-shadow:
+      0 6px 10px #00eaffbb,
+      inset 0 2px 4px #e0ffff88;
+    outline: none;
+  }
+  .tile:active {
+    filter: brightness(1.4);
+    box-shadow:
+      0 0 18px #00dfffcc,
+      inset 0 2px 6px #e0ffffaa;
+    transform: scale(0.97) translate(var(--x), var(--y));
+  }
 
-    label {
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+  #message {
+    margin-top: 16px;
+    min-height: 26px;
+    font-weight: 600;
+    text-align: center;
+    color: #00ffff;
+    text-shadow: 0 0 6px #00ffffbb;
+    user-select: text;
+  }
 
-    select, input[type="date"] {
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      padding: 4px 6px;
-      font-size: 14px;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    body.dark select,
-    body.dark input[type="date"] {
-      background-color: #333;
-      color: var(--text-dark);
-      border-color: #555;
-    }
+  #progressContainer {
+    margin-top: 12px;
+    width: 400px;
+    height: 16px;
+    background: #111a28;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px #00dfffbb;
+  }
+  #progressBar {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #00eaff, #0099ff);
+    border-radius: 12px 0 0 12px;
+    transition: width 0.5s ease;
+  }
 
-  </style>
+  #previewImage {
+    margin-top: 16px;
+    width: 400px;
+    height: 400px;
+    border-radius: 12px;
+    box-shadow: 0 0 16px #00eaffbb;
+    background-image: url('https://i.imgur.com/Y101JgD.jpeg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.7s ease;
+    user-select: none;
+  }
+  #previewImage.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  #controls {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+  #controls > * {
+    flex: 1 1 140px;
+    min-width: 120px;
+  }
+
+  #stats {
+    margin-top: 12px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-around;
+    color: #00dfff;
+    text-shadow: 0 0 6px #00dfffbb;
+  }
+  #stats div {
+    user-select: text;
+  }
+
+  /* Fireworks canvas overlay */
+  #fireworks {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Responsive */
+  @media (max-width: 460px) {
+    #board, #progressContainer, #previewImage {
+      width: 95vw;
+      height: 95vw;
+    }
+  }
+</style>
 </head>
 <body>
 
-  <h1>Khamal List Maker</h1>
+<h1>Khamal Puzzle Game</h1>
 
+<div id="startScreen">
+  <label for="startDifficulty">Select Difficulty:</label>
+  <select id="startDifficulty" aria-label="Select difficulty for new game">
+    <option value="3">3 x 3</option>
+    <option value="4" selected>4 x 4</option>
+    <option value="5">5 x 5</option>
+  </select>
+  <button id="startBtn" aria-label="Start new puzzle game">Start Game</button>
+</div>
+
+<div id="gameContainer" aria-live="polite" style="display:none;">
   <div id="controls">
-    <input type="text" id="itemInput" placeholder="Add new item and press Enter" />
-    <input type="date" id="dueDate" />
-    <select id="category">
-      <option value="">Select category</option>
-      <option value="Work">Work</option>
-      <option value="Shopping">Shopping</option>
-      <option value="Ideas">Ideas</option>
-      <option value="Others">Others</option>
+    <label for="difficulty">Change Difficulty:</label>
+    <select id="difficulty" aria-label="Change puzzle difficulty">
+      <option value="3">3 x 3</option>
+      <option value="4" selected>4 x 4</option>
+      <option value="5">5 x 5</option>
     </select>
+
+    <button id="shuffleBtn" aria-label="Shuffle puzzle tiles">Shuffle</button>
+
+    <button id="previewToggle" aria-pressed="false" aria-label="Show or hide preview image">Show Preview</button>
   </div>
 
-  <input type="text" id="searchInput" placeholder="Search/filter list" />
+  <div id="board" role="grid" aria-label="Sliding puzzle board" tabindex="0"></div>
 
-  <button id="launchBtn">🚀 Launch List</button>
-  <button id="clearBtn">🧹 Clear All</button>
-  <button id="darkModeBtn">🌓 Toggle Dark Mode</button>
+  <div id="progressContainer" aria-label="Puzzle completion progress">
+    <div id="progressBar"></div>
+  </div>
 
-  <ul id="itemList"></ul>
+  <div id="stats" aria-live="polite" aria-atomic="true">
+    <div id="moveCount">Moves: 0</div>
+    <div id="timer">Time: 00:00</div>
+  </div>
 
-  <script>
-    const input = document.getElementById('itemInput');
-    const dueDateInput = document.getElementById('dueDate');
-    const categorySelect = document.getElementById('category');
-    const searchInput = document.getElementById('searchInput');
-    const itemList = document.getElementById('itemList');
-    const launchBtn = document.getElementById('launchBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const darkModeBtn = document.getElementById('darkModeBtn');
+  <div id="message" role="alert"></div>
 
-    let items = [];
+  <div id="previewImage" aria-hidden="true"></div>
+</div>
 
-    // Load saved items and theme
-    window.onload = () => {
-      const saved = localStorage.getItem('khamalList');
-      if (saved) {
-        items = JSON.parse(saved);
-        renderList();
+<canvas id="fireworks"></canvas>
+
+<script>
+(() => {
+  const board = document.getElementById("board");
+  const message = document.getElementById("message");
+  const previewToggle = document.getElementById("previewToggle");
+  const previewImage = document.getElementById("previewImage");
+  const shuffleBtn = document.getElementById("shuffleBtn");
+  const difficultySelect = document.getElementById("difficulty");
+  const startDifficultySelect = document.getElementById("startDifficulty");
+  const startBtn = document.getElementById("startBtn");
+  const startScreen = document.getElementById("startScreen");
+  const gameContainer = document.getElementById("gameContainer");
+  const progressBar = document.getElementById("progressBar");
+  const moveCountDisplay = document.getElementById("moveCount");
+  const timerDisplay = document.getElementById("timer");
+  const fireworksCanvas = document.getElementById("fireworks");
+  const ctx = fireworksCanvas.getContext('2d');
+
+  const IMAGE_SIZE = 400;
+  const STORAGE_KEY = "khamalSlidingPuzzleState";
+
+  let size = 4;
+  let tiles = [];
+  let emptyIndex = null;
+  let moveCount = 0;
+  let timer = null;
+  let startTime = null;
+  let gameActive = false;
+
+  // Fireworks state
+  let fireworksActive = false;
+  let particles = [];
+
+  // Resize fireworks canvas
+  function resizeCanvas() {
+    fireworksCanvas.width = window.innerWidth;
+    fireworksCanvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  function createTiles(size) {
+    tiles = [];
+    for (let i = 0; i < size * size - 1; i++) {
+      tiles.push(i);
+    }
+    tiles.push(null); // empty tile
+    emptyIndex = tiles.length - 1;
+    setBoardGrid(size);
+  }
+
+  function setBoardGrid(size) {
+    board.style.width = IMAGE_SIZE + "px";
+    board.style.height = IMAGE_SIZE + "px";
+  }
+
+  function renderBoard() {
+    board.innerHTML = "";
+    const tileSize = board.clientWidth / size;
+
+    for (let i = 0; i < tiles.length; i++) {
+      const tileNumber = tiles[i];
+      if (tileNumber === null) continue;
+
+      const tile = document.createElement("button");
+      tile.classList.add("tile");
+      tile.setAttribute("aria-label", `Tile ${tileNumber + 1}`);
+      tile.setAttribute("role", "gridcell");
+      tile.dataset.index = i;
+      tile.style.width = `${tileSize}px`;
+      tile.style.height = `${tileSize}px`;
+
+      // Background position
+      const bgX = (tileNumber % size) * tileSize;
+      const bgY = Math.floor(tileNumber / size) * tileSize;
+      tile.style.backgroundPosition = `-${bgX}px -${bgY}px`;
+
+      // Position on board using CSS variables for animation
+      const x = (i % size) * tileSize;
+      const y = Math.floor(i / size) * tileSize;
+      tile.style.setProperty("--x", `${x}px`);
+      tile.style.setProperty("--y", `${y}px`);
+      tile.style.transform = `translate(${x}px, ${y}px)`;
+
+      tile.addEventListener("click", () => moveTile(i));
+      tile.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          moveTile(i);
+        }
+      });
+
+      board.appendChild(tile);
+    }
+    updateProgress();
+    updateMoveCount();
+  }
+
+  function moveTile(tilePos) {
+    if (!gameActive) return;
+
+    const row1 = Math.floor(tilePos / size);
+    const col1 = tilePos % size;
+    const row2 = Math.floor(emptyIndex / size);
+    const col2 = emptyIndex % size;
+
+    if (Math.abs(row1 - row2) + Math.abs(col1 - col2) === 1) {
+      [tiles[tilePos], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[tilePos]];
+      emptyIndex = tilePos;
+      moveCount++;
+      renderBoard();
+      updateProgress();
+      updateMoveCount();
+      saveGame();
+
+      if (checkSolved()) {
+        message.textContent = "🎉 Puzzle solved! Congratulations!";
+        gameActive = false;
+        stopTimer();
+        startFireworks();
+      } else {
+        message.textContent = "";
       }
-      const darkMode = localStorage.getItem('khamalDarkMode');
-      if (darkMode === 'enabled') {
-        document.body.classList.add('dark');
+    } else {
+      shakeTile(tilePos);
+    }
+  }
+
+  function shakeTile(index) {
+    const tile = board.querySelector(`button[data-index='${index}']`);
+    if (!tile) return;
+    tile.style.transition = "transform 0.1s ease";
+    tile.style.transform += " translateX(10px)";
+    setTimeout(() => {
+      tile.style.transform = tile.style.transform.replace(" translateX(10px)", "");
+    }, 100);
+  }
+
+  function shuffleTiles() {
+    if (!gameActive) return;
+    do {
+      for (let i = tiles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
       }
+      emptyIndex = tiles.indexOf(null);
+    } while (!isSolvable() || checkSolved());
+
+    moveCount = 0;
+    renderBoard();
+    message.textContent = "";
+    updateProgress();
+    updateMoveCount();
+    saveGame();
+  }
+
+  function isSolvable() {
+    // Count inversions
+    let invCount = 0;
+    let tileArr = tiles.filter(t => t !== null);
+    for (let i = 0; i < tileArr.length - 1; i++) {
+      for (let j = i + 1; j < tileArr.length; j++) {
+        if (tileArr[i] > tileArr[j]) invCount++;
+      }
+    }
+    if (size % 2 === 1) {
+      return invCount % 2 === 0;
+    } else {
+      // Even grid
+      let emptyRowFromBottom = size - Math.floor(emptyIndex / size);
+      if (emptyRowFromBottom % 2 === 0) {
+        return invCount % 2 === 1;
+      } else {
+        return invCount % 2 === 0;
+      }
+    }
+  }
+
+  function checkSolved() {
+    for (let i = 0; i < tiles.length - 1; i++) {
+      if (tiles[i] !== i) return false;
+    }
+    return true;
+  }
+
+  function togglePreview() {
+    const visible = previewImage.classList.toggle("visible");
+    previewToggle.setAttribute("aria-pressed", visible ? "true" : "false");
+    previewToggle.textContent = visible ? "Hide Preview" : "Show Preview";
+  }
+
+  function updateProgress() {
+    let correct = 0;
+    for (let i = 0; i < tiles.length - 1; i++) {
+      if (tiles[i] === i) correct++;
+    }
+    const percent = (correct / (tiles.length - 1)) * 100;
+    progressBar.style.width = `${percent}%`;
+  }
+
+  function updateMoveCount() {
+    moveCountDisplay.textContent = `Moves: ${moveCount}`;
+  }
+
+  function startTimer() {
+    startTime = Date.now();
+    timer = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const minutes = Math.floor(elapsed / 60000).toString().padStart(2, "0");
+      const seconds = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, "0");
+      timerDisplay.textContent = `Time: ${minutes}:${seconds}`;
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timer);
+  }
+
+  function saveGame() {
+    const data = {
+      tiles,
+      emptyIndex,
+      size,
+      moveCount,
+      elapsedTime: startTime ? Date.now() - startTime : 0,
+      gameActive
     };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
 
-    // Add item on Enter key
-    input.addEventListener('keypress', e => {
-      if (e.key === 'Enter' && input.value.trim() !== '') {
-        addItem(input.value.trim(), dueDateInput.value, categorySelect.value);
-        input.value = '';
-        dueDateInput.value = '';
-        categorySelect.value = '';
+  function loadGame() {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (!data) return false;
+
+    try {
+      const parsed = JSON.parse(data);
+      if (
+        Array.isArray(parsed.tiles) &&
+        parsed.tiles.length === parsed.size * parsed.size &&
+        typeof parsed.emptyIndex === "number" &&
+        typeof parsed.moveCount === "number"
+      ) {
+        tiles = parsed.tiles;
+        emptyIndex = parsed.emptyIndex;
+        size = parsed.size;
+        moveCount = parsed.moveCount;
+        gameActive = parsed.gameActive ?? false;
+
+        startDifficultySelect.value = size;
+        difficultySelect.value = size;
+        startScreen.style.display = "none";
+        gameContainer.style.display = "block";
+
+        renderBoard();
+        updateProgress();
+        updateMoveCount();
+
+        if (gameActive) {
+          startTimer();
+          message.textContent = "";
+        } else if (checkSolved()) {
+          message.textContent = "🎉 Puzzle solved! Congratulations!";
+        }
+
+        return true;
       }
-    });
+    } catch {
+      return false;
+    }
+    return false;
+  }
 
-    // Search/filter on input
-    searchInput.addEventListener('input', () => {
-      renderList();
-    });
+  function startNewGame() {
+    size = parseInt(startDifficultySelect.value, 10);
+    createTiles(size);
+    shuffleTiles();
+    moveCount = 0;
+    gameActive = true;
+    startScreen.style.display = "none";
+    gameContainer.style.display = "block";
+    difficultySelect.value = size;
+    message.textContent = "";
+    updateMoveCount();
+    startTimer();
+    saveGame();
+  }
 
-    function addItem(text, due, category) {
-      items.push({
-        text,
-        due: due || null,
-        category: category || '',
-        done: false,
-        id: Date.now()
-      });
-      saveList();
-      renderList();
+  // Fireworks animation on win
+  class Particle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.vx = (Math.random() - 0.5) * 7;
+      this.vy = (Math.random() - 1.5) * 7;
+      this.alpha = 1;
+      this.size = Math.random() * 3 + 2;
+      this.color = `hsl(${Math.random() * 360}, 100%, 70%)`;
+      this.gravity = 0.12;
+      this.decay = 0.015;
+    }
+    update() {
+      this.vy += this.gravity;
+      this.x += this.vx;
+      this.y += this.vy;
+      this.alpha -= this.decay;
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.globalAlpha = this.alpha;
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  function startFireworks() {
+    fireworksActive = true;
+    particles = [];
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 3;
+
+    for (let i = 0; i < 150; i++) {
+      particles.push(new Particle(centerX, centerY));
     }
 
-    function renderList() {
-      itemList.innerHTML = '';
+    function animate() {
+      if (!fireworksActive) return;
 
-      const filterText = searchInput.value.trim().toLowerCase();
-
-      items
-        .filter(item => item.text.toLowerCase().includes(filterText) || (item.category && item.category.toLowerCase().includes(filterText)))
-        .forEach(item => {
-          const li = document.createElement('li');
-          if (item.done) li.classList.add('done');
-
-          li.innerHTML = `
-            <label>
-              <input type="checkbox" ${item.done ? 'checked' : ''} data-id="${item.id}" />
-              <span class="item-text">${escapeHtml(item.text)}</span>
-            </label>
-            <div class="item-meta">
-              ${item.due ? `<span>📅 ${item.due}</span>` : ''}
-              ${item.category ? `<span>🏷️ ${escapeHtml(item.category)}</span>` : ''}
-            </div>
-            <button class="delete-btn" data-id="${item.id}" title="Delete item">❌</button>
-          `;
-
-          itemList.appendChild(li);
-        });
-
-      // Attach event listeners for new elements
-      itemList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', toggleDone);
+      ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+      particles.forEach((p, i) => {
+        p.update();
+        p.draw(ctx);
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+        }
       });
-      itemList.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', deleteItem);
-      });
-    }
 
-    function toggleDone(e) {
-      const id = Number(e.target.getAttribute('data-id'));
-      const item = items.find(i => i.id === id);
-      if (item) {
-        item.done = e.target.checked;
-        saveList();
-        renderList();
+      if (particles.length === 0) {
+        fireworksActive = false;
+        ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+      } else {
+        requestAnimationFrame(animate);
       }
     }
+    animate();
+  }
 
-    function deleteItem(e) {
-      const id = Number(e.target.getAttribute('data-id'));
-      items = items.filter(i => i.id !== id);
-      saveList();
-      renderList();
+  // Event listeners
+  startBtn.addEventListener("click", startNewGame);
+
+  difficultySelect.addEventListener("change", () => {
+    size = parseInt(difficultySelect.value, 10);
+    createTiles(size);
+    shuffleTiles();
+    moveCount = 0;
+    gameActive = true;
+    message.textContent = "";
+    updateMoveCount();
+    startTimer();
+    saveGame();
+  });
+
+  shuffleBtn.addEventListener("click", () => {
+    if (!gameActive) return;
+    shuffleTiles();
+    moveCount = 0;
+    message.textContent = "";
+    updateMoveCount();
+    startTimer();
+    saveGame();
+  });
+
+  previewToggle.addEventListener("click", togglePreview);
+
+  // Keyboard support for board
+  board.addEventListener("keydown", e => {
+    const focused = document.activeElement;
+    if (!focused.classList.contains("tile")) return;
+
+    let idx = parseInt(focused.dataset.index, 10);
+    let targetIdx = null;
+    switch (e.key) {
+      case "ArrowUp": targetIdx = idx + size; break;
+      case "ArrowDown": targetIdx = idx - size; break;
+      case "ArrowLeft": targetIdx = idx + 1; break;
+      case "ArrowRight": targetIdx = idx - 1; break;
     }
-
-    launchBtn.addEventListener('click', () => {
-      if (items.length === 0) {
-        alert('Your list is empty!');
-        return;
-      }
-
-      const activeItems = items.filter(i => !i.done);
-      const lines = activeItems.map(i => {
-        let line = i.text;
-        if (i.category) line += ` [${i.category}]`;
-        if (i.due) line += ` (Due: ${i.due})`;
-        return line;
-      });
-
-      alert('Launching List (Active items only):\n\n' + (lines.length ? lines.join('\n') : '(No active items)'));
-    });
-
-    clearBtn.addEventListener('click', () => {
-      if (confirm('Are you sure you want to clear the entire list?')) {
-        items = [];
-        saveList();
-        renderList();
-      }
-    });
-
-    darkModeBtn.addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      localStorage.setItem('khamalDarkMode', document.body.classList.contains('dark') ? 'enabled' : 'disabled');
-    });
-
-    function saveList() {
-      localStorage.setItem('khamalList', JSON.stringify(items));
+    if (targetIdx !== null && targetIdx >= 0 && targetIdx < tiles.length) {
+      e.preventDefault();
+      const tileToFocus = board.querySelector(`button[data-index='${targetIdx}']`);
+      if (tileToFocus) tileToFocus.focus();
     }
+  });
 
-    // Basic HTML escape to avoid injection
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-  </script>
-// Register service worker
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js")
-    .then(() => console.log("Service Worker Registered"))
-    .catch((err) => console.error("SW Error:", err));
-}
-
-
+  // Load saved game or init new
+  if (!loadGame()) {
+    startScreen.style.display = "block";
+    gameContainer.style.display = "none";
+  } else {
+    startTimer();
+  }
+})();
+</script>
 </body>
 </html>
