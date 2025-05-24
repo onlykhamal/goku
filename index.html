@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>,<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#28a745" />
+<link rel="icon" href="icon-192.png" />
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Khamal List Maker</title>
+  <style>
+    :root {
+      --bg-light: #f8f9fa;
+      --bg-dark: #121212;
+      --text-light: #333;
+      --text-dark: #eee;
+      --accent: #28a745;
+      --accent-dark: #4caf50;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    #controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    #itemInput, #dueDate, #category, #searchInput {
+      flex: 1 1 150px;
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark #itemInput,
+    body.dark #dueDate,
+    body.dark #category,
+    body.dark #searchInput {
+      background-color: #333;
+      color: var(--text-dark);
+      border-color: #555;
+    }
+
+    button {
+      padding: 10px 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: var(--accent);
+      color: white;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: var(--accent-dark);
+    }
+    #clearBtn {
+      background-color: #dc3545;
+    }
+    #clearBtn:hover {
+      background-color: #b02a37;
+    }
+    #darkModeBtn {
+      background-color: #007bff;
+    }
+    #darkModeBtn:hover {
+      background-color: #0056b3;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 20px;
+    }
+
+    li {
+      background-color: white;
+      margin-bottom: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid #ddd;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark li {
+      background-color: #222;
+      border-color: #444;
+      color: var(--text-dark);
+    }
+
+    li.done label {
+      text-decoration: line-through;
+      color: gray;
+    }
+
+    .item-text {
+      flex: 1 1 200px;
+      word-break: break-word;
+    }
+    .item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    body.dark .item-meta {
+      color: #bbb;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: red;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+      align-self: flex-start;
+      transition: color 0.3s;
+    }
+    .delete-btn:hover {
+      color: #b02a37;
+    }
+
+    label {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    select, input[type="date"] {
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      padding: 4px 6px;
+      font-size: 14px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark select,
+    body.dark input[type="date"] {
+      background-color: #333;
+      color: var(--text-dark);
+      border-color: #555;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>Khamal List Maker</h1>
+
+  <div id="controls">
+    <input type="text" id="itemInput" placeholder="Add new item and press Enter" />
+    <input type="date" id="dueDate" />
+    <select id="category">
+      <option value="">Select category</option>
+      <option value="Work">Work</option>
+      <option value="Shopping">Shopping</option>
+      <option value="Ideas">Ideas</option>
+      <option value="Others">Others</option>
+    </select>
+  </div>
+
+  <input type="text" id="searchInput" placeholder="Search/filter list" />
+
+  <button id="launchBtn">🚀 Launch List</button>
+  <button id="clearBtn">🧹 Clear All</button>
+  <button id="darkModeBtn">🌓 Toggle Dark Mode</button>
+
+  <ul id="itemList"></ul>
+
+  <script>
+    const input = document.getElementById('itemInput');
+    const dueDateInput = document.getElementById('dueDate');
+    const categorySelect = document.getElementById('category');
+    const searchInput = document.getElementById('searchInput');
+    const itemList = document.getElementById('itemList');
+    const launchBtn = document.getElementById('launchBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const darkModeBtn = document.getElementById('darkModeBtn');
+
+    let items = [];
+
+    // Load saved items and theme
+    window.onload = () => {
+      const saved = localStorage.getItem('khamalList');
+      if (saved) {
+        items = JSON.parse(saved);
+        renderList();
+      }
+      const darkMode = localStorage.getItem('khamalDarkMode');
+      if (darkMode === 'enabled') {
+        document.body.classList.add('dark');
+      }
+    };
+
+    // Add item on Enter key
+    input.addEventListener('keypress', e => {
+      if (e.key === 'Enter' && input.value.trim() !== '') {
+        addItem(input.value.trim(), dueDateInput.value, categorySelect.value);
+        input.value = '';
+        dueDateInput.value = '';
+        categorySelect.value = '';
+      }
+    });
+
+    // Search/filter on input
+    searchInput.addEventListener('input', () => {
+      renderList();
+    });
+
+    function addItem(text, due, category) {
+      items.push({
+        text,
+        due: due || null,
+        category: category || '',
+        done: false,
+        id: Date.now()
+      });
+      saveList();
+      renderList();
+    }
+
+    function renderList() {
+      itemList.innerHTML = '';
+
+      const filterText = searchInput.value.trim().toLowerCase();
+
+      items
+        .filter(item => item.text.toLowerCase().includes(filterText) || (item.category && item.category.toLowerCase().includes(filterText)))
+        .forEach(item => {
+          const li = document.createElement('li');
+          if (item.done) li.classList.add('done');
+
+          li.innerHTML = `
+            <label>
+              <input type="checkbox" ${item.done ? 'checked' : ''} data-id="${item.id}" />
+              <span class="item-text">${escapeHtml(item.text)}</span>
+            </label>
+            <div class="item-meta">
+              ${item.due ? `<span>📅 ${item.due}</span>` : ''}
+              ${item.category ? `<span>🏷️ ${escapeHtml(item.category)}</span>` : ''}
+            </div>
+            <button class="delete-btn" data-id="${item.id}" title="Delete item">❌</button>
+          `;
+
+          itemList.appendChild(li);
+        });
+
+      // Attach event listeners for new elements
+      itemList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', toggleDone);
+      });
+      itemList.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', deleteItem);
+      });
+    }
+
+    function toggleDone(e) {
+      const id = Number(e.target.getAttribute('data-id'));
+      const item = items.find(i => i.id === id);
+      if (item) {
+        item.done = e.target.checked;
+        saveList();
+        renderList();
+      }
+    }
+
+    function deleteItem(e) {
+      const id = Number(e.target.getAttribute('data-id'));
+      items = items.filter(i => i.id !== id);
+      saveList();
+      renderList();
+    }
+
+    launchBtn.addEventListener('click', () => {
+      if (items.length === 0) {
+        alert('Your list is empty!');
+        return;
+      }
+
+      const activeItems = items.filter(i => !i.done);
+      const lines = activeItems.map(i => {
+        let line = i.text;
+        if (i.category) line += ` [${i.category}]`;
+        if (i.due) line += ` (Due: ${i.due})`;
+        return line;
+      });
+
+      alert('Launching List (Active items only):\n\n' + (lines.length ? lines.join('\n') : '(No active items)'));
+    });
+
+    clearBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear the entire list?')) {
+        items = [];
+        saveList();
+        renderList();
+      }
+    });
+
+    darkModeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('khamalDarkMode', document.body.classList.contains('dark') ? 'enabled' : 'disabled');
+    });
+
+    function saveList() {
+      localStorage.setItem('khamalList', JSON.stringify(items));
+    }
+
+    // Basic HTML escape to avoid injection
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+// Register service worker
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js")
+    .then(() => console.log("Service Worker Registered"))
+    .catch((err) => console.error("SW Error:", err));
+}
+
+
+</body>
+</html>
